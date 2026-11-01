@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Tracking BA</title>
+</head>
+
+<style>
+    form {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        width: 300px;
+        margin: 30px auto;
+    }
+    form label {
+        display: block;
+        font-size: 18px;
+        text-align: center;
+        margin-bottom: 5px;
+    }
+    form input {
+        border: 1px solid #848383;
+        border-radius: 5px;
+        outline: none;
+        padding: 10px;
+        display: block;
+        width: 95%;
+        font-family: Segoe UI;
+        font-size: 18px;
+    }
+    .button-cari {
+        background-color: #fb8b24;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        color: white;
+        display: block;
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 5px;
+        cursor: pointer;
+    }
+    .button-cari:hover {
+        background-color: #ff0000;
+    }
+    .button-tambahDO {
+        background-color: #1859bc;
+        color: #ffff;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        width: 100%;
+        padding: 10px;
+        cursor: pointer;
+    }
+    .button-tambahDO:hover {
+        background-color: rgb(255, 0, 0);
+        color: #ffff;
+    }
+    .button-simpan {
+        margin-top: 15px;
+        margin-right: 10px;
+        background-color: #1859bc;
+        color: #ffff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .button-batal {
+        margin-top: 15px;
+        background-color: #ff0000;
+        color: #ffff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .button-simpan:hover, .button-batal:hover {
+        background-color: #fb8b24;
+        color: #fff;
+    }
+    
+    /* GAYA TABEL HASIL PENCARIAN DI TENGAH (TANPA BORDER LUAR) */
+    .tabel-hasil {
+        width: 60%;
+        margin: 30px auto;
+        border-collapse: collapse;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .tabel-hasil th, .tabel-hasil td {
+        border: 1px solid #595959;
+        padding: 10px 15px;
+        text-align: left;
+    }
+    .tabel-hasil thead {
+        background-color: #1859bc;
+        color: #ffff;
+    }
+    .kolom-judul {
+        background-color: #1859bc;
+        color: #fff;
+    }
+
+    .pesan {
+        text-align: center;
+        color: red;
+    }
+    
+    /* Styling Modal */
+    .modal-overlay {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+    }
+    .modal-content {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        width: 450px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    .modal-content form {
+        width: 100%;
+        margin: 0;
+    }
+    .modal-content form input, 
+    .modal-content form select {
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 8px;
+        box-sizing: border-box;
+        border: 1px solid #848383;
+        border-radius: 5px;
+    }
+    .detail-isi-paket {
+        background: #f9f9f9;
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 14px;
+        margin-bottom: 10px;
+        border: 1px dashed #ccc;
+    }
+</style>
+
+<body>
+    <!-- NAVIGASI MENU -->
+    <div class="topnav">
+        <a href="index.html">Home</a>
+        <a href="stok.html">Stok Bahan Ajar</a>
+        <a class="active" href="tracking.html">Tracking Bahan Ajar</a>
+    </div>
+
+    <h1 style="text-align: center;">Tracking Delivery Order (DO)</h1>
+
+    <div id="app" class="container">
+        <!-- FORM PENCARIAN -->
+        <form @submit.prevent="formBilling">
+            <label>Nomor DO/Billing</label>
+            <input type="text" v-model="inputBilling" placeholder="Format: DOyyyy-xxxx">
+            <br>
+
+            <button type="submit" class="button-cari">Cari</button>
+            <button type="button" class="button-tambahDO" @click="bukaModalTambah">Tambah DO Baru</button>
+        </form>
+
+        <!-- PESAN -->
+        <p class="pesan" v-if="pesan">
+            {{ pesan }}
+        </p>
+
+        <!-- HASIL TRACKING -->
+        <table class="tabel-hasil" v-if="hasilTracking">
+            <tr>
+                <td class="kolom-judul"><strong>Nomor DO</strong></td>
+                <td class="kolom-judul">: {{ inputBilling }}</td>
+            </tr>
+            <tr>
+                <td><strong>NIM</strong></td>
+                <td>: {{ hasilTracking.nim }}</td>
+            </tr>
+            <tr>
+                <td><strong>Nama</strong></td>
+                <td>: {{ hasilTracking.nama }}</td>
+            </tr>
+            <tr>
+                <td><strong>Status</strong></td>
+                <td>: {{ hasilTracking.status }}</td>
+            </tr>
+            <tr>
+                <td><strong>Ekspedisi</strong></td>
+                <td>: {{ hasilTracking.ekspedisi }}</td>
+            </tr>
+            <tr>
+                <td><strong>Tanggal Kirim</strong></td>
+                <td>: {{ hasilTracking.tanggalKirim }}</td>
+            </tr>
+            <tr>
+                <td><strong>Paket</strong></td>
+                <td>: {{ hasilTracking.paket }}</td>
+            </tr>
+            <tr>
+                <td><strong>Total Harga</strong></td>
+                <td>: {{ hasilTracking.total }}</td>
+            </tr>
+            <tr>
+                <td colspan="2" class="kolom-judul"><strong>Riwayat Perjalanan :</strong></td>
+            </tr>
+            <!-- V-FOR TAMPILKAN RIWAYAT PERJALANAN -->
+            <tr v-for="(jalan, index) in hasilTracking.perjalanan" :key="index">
+                <td colspan="2">{{ jalan.waktu }} - {{ jalan.keterangan }}</td>
+            </tr>
+        </table>
+
+        <!-- FORM TAMBAH DO (MODAL) -->
+        <div class="modal-overlay" v-if="openFormTambah">
+            <div class="modal-content">
+                <h3>Tambah Delivery Order Baru</h3>
+                
+                <form @submit.prevent="tambahDO">
+                    <label>Nomor DO</label>
+                    <input type="text" v-model="input.nomorDO" disabled>
+
+                    <label>NIM</label>
+                    <input type="text" v-model="input.nim" placeholder="Masukkan NIM" required>
+
+                    <label>Nama</label>
+                    <input type="text" v-model="input.nama" placeholder="Masukkan Nama Mahasiswa" required>
+
+                    <!-- EKSPEDISI -->
+                    <label>Ekspedisi</label>
+                    <select v-model="input.ekspedisi" required>
+                        <option disabled value="">Pilih Ekspedisi</option>
+                        <option v-for="item in pengirimanList" :value="item.nama">
+                            {{ item.nama }}
+                        </option>
+                    </select>
+
+                    <!-- PAKET BAHAN AJAR -->
+                    <label>PAKET</label>
+                    <select v-model="input.indexPaket" required>
+                        <option disabled value="">Pilih Paket Bahan Ajar</option>
+                        <option v-for="(pkt, index) in paket" :value="index">
+                            {{ pkt.nama }}
+                        </option>
+                    </select>
+
+                    <!-- ISI PAKET DARI SELECT -->
+                    <div class="detail-isi-paket" v-if="detailPaketPilihan.length > 0">
+                        <strong>Kode Bahan Ajar dalam Paket:</strong>
+                        <ul>
+                            <li v-for="(kodeBahan, idx) in detailPaketPilihan" :key="idx">{{ kodeBahan }}</li>
+                        </ul>
+                    </div>
+                    
+                    <label>Tanggal Kirim</label>
+                    <input type="date" v-model="input.tanggalKirim" required>
+
+                    <label>Total Harga</label>
+                    <input type="text" :value="'Rp ' + formatRupiah(input.harga)" disabled>
+        
+                    <div>
+                        <button type="submit" class="button-simpan">Simpan</button>
+                        <button type="button" class="button-batal" @click="openFormTambah = false">Batal</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script type="module" src="js/tracking-app.js"></script>
+</body>
+</html>
